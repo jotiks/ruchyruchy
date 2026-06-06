@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f9f7;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+    --text: #111;
+    --muted: #777;
+    --tag-bg: #f0efeb;
+    --tag-text: #555;
+    --pill-active-bg: #111;
+    --pill-active-text: #fff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141414;
+      --surface: #1e1e1e;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.22);
+      --text: #f0f0f0;
+      --muted: #888;
+      --tag-bg: #2a2a2a;
+      --tag-text: #aaa;
+      --pill-active-bg: #f0f0f0;
+      --pill-active-text: #111;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 1.5rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 1.75rem;
+  }
+  .nav-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* FILTERS */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .filter-btn {
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .filter-btn.active {
+    background: var(--pill-active-bg);
+    color: var(--pill-active-text);
+    border-color: var(--pill-active-bg);
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--tag-bg);
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .play-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .card:hover .play-overlay { opacity: 1; }
+  .play-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn svg { width: 16px; height: 16px; fill: #111; margin-left: 2px; }
+
+  .card-body { padding: 10px 14px 14px; }
+  .card-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    letter-spacing: 0.02em;
+  }
+
+  /* LIGHTBOX */
+  .lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-inner {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .lightbox-inner iframe { width: 100%; height: 100%; border: none; }
+  .lightbox-close {
+    position: absolute;
+    top: -2.5rem; right: 0;
+    background: none; border: none;
+    color: #fff; font-size: 28px;
+    cursor: pointer; line-height: 1;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-name" href="#">Your Name</a>
+  <ul class="nav-links">
+    <li><a href="#">Work</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#" onclick="alert('michal@email.com'); return false;">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="filter-bar" id="filters">
+  <button class="filter-btn active" data-cat="all">All</button>
+  <button class="filter-btn" data-cat="launch">Launch</button>
+  <button class="filter-btn" data-cat="product">Product</button>
+  <button class="filter-btn" data-cat="explainer">Explainer</button>
+  <button class="filter-btn" data-cat="lottie">Lottie</button>
+  <button class="filter-btn" data-cat="rive">Rive</button>
+</div>
+
+<div class="grid" id="grid">
+  <!-- 
+    JAK DODAC NOWY FILM:
+    1. Skopiuj blok <div class="card"> ... </div> poniżej
+    2. Zmień data-cat na: launch / product / explainer / lottie / rive
+    3. Dla Vimeo: embed-url = "https://player.vimeo.com/video/TWOJ_ID"
+       Dla YouTube: embed-url = "https://www.youtube.com/embed/TWOJ_ID"
+    4. thumb-url = link do miniatury (dla YT: https://i.ytimg.com/vi/TWOJ_ID/hqdefault.jpg)
+    5. Zmień tytul i tag
+  -->
+
+  <div class="card" data-cat="launch"
+    data-embed="https://player.vimeo.com/video/76979871?autoplay=1"
+    data-thumb="https://vumbnail.com/76979871.jpg">
+    <div class="thumb">
+      <img src="https://vumbnail.com/76979871.jpg" alt="Modaic Brand Launch">
+      <div class="play-overlay">
+        <div class="play-btn"><svg viewBox="0 0 16 16"><polygon points="3,1 15,8 3,15"/></svg></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-title">Modaic — Brand Launch</p>
+      <span class="card-tag">Launch</span>
+    </div>
+  </div>
+
+  <div class="card" data-cat="product"
+    data-embed="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+    data-thumb="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
+    <div class="thumb">
+      <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="Product Demo">
+      <div class="play-overlay">
+        <div class="play-btn"><svg viewBox="0 0 16 16"><polygon points="3,1 15,8 3,15"/></svg></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-title">Elastics — Product Demo</p>
+      <span class="card-tag">Product</span>
+    </div>
+  </div>
+
+  <div class="card" data-cat="explainer"
+    data-embed="https://player.vimeo.com/video/148751763?autoplay=1"
+    data-thumb="https://vumbnail.com/148751763.jpg">
+    <div class="thumb">
+      <img src="https://vumbnail.com/148751763.jpg" alt="Explainer">
+      <div class="play-overlay">
+        <div class="play-btn"><svg viewBox="0 0 16 16"><polygon points="3,1 15,8 3,15"/></svg></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-title">How it works</p>
+      <span class="card-tag">Explainer</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner" id="lightbox-inner">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Zamknij">&times;</button>
+  </div>
+</div>
+
+<script>
+  // Filtry
+  document.getElementById('filters').addEventListener('click', function(e) {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.cat;
+    document.querySelectorAll('.card').forEach(card => {
+      card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+    });
+  });
+
+  // Lightbox - otwieranie
+  document.getElementById('grid').addEventListener('click', function(e) {
+    const card = e.target.closest('.card');
+    if (!card || !card.dataset.embed) return;
+    const inner = document.getElementById('lightbox-inner');
+    const old = inner.querySelector('iframe');
+    if (old) old.remove();
+    const iframe = document.createElement('iframe');
+    iframe.src = card.dataset.embed;
+    iframe.allow = 'autoplay; fullscreen';
+    inner.appendChild(iframe);
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+
+  // Lightbox - zamykanie
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+    const inner = document.getElementById('lightbox-inner');
+    const iframe = inner.querySelector('iframe');
+    if (iframe) iframe.remove();
+  }
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+
+</body>
+</html>
